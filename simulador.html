@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  	<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+	<div class="container">
+		<div class="row col-md-12 text-center">
+			<h1>Simulador Gerenciamento de Transações</h1>
+		</div>
+		<br/>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+	    			<h4 for="exampleInputEmail1">Escolha a quantidade de transações:</h4>
+					<div class="text-justify">
+						<label  class="radio-inline"><input id="rdb1" type="radio" name="optradio">2</label>
+						<label  class="radio-inline"><input id="rdb2" type="radio" name="optradio">3</label>
+						<label  class="radio-inline"><input id="rdb3" type="radio" name="optradio">4</label>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+    				<h4>Digite cada dado:</h4>
+    				<input type="email" class="form-control" id="IdDados" aria-describedby="emailHelp" placeholder="Digite o dado">
+    			</div>
+			</div>
+			<div class="col-md-4 text-center">
+    			<h4>Dados Cadastrados:</h4>
+    			<h4><div id=idDadosCadastrados></div></h4>
+
+				
+			</div>
+ 		</div>
+
+ 		<div class="row">
+ 			<div class="col-md-11 text-right">
+ 				<button id=addTransacao class="btn btn-primary">Adicionar Transação</button>
+ 			</div>
+ 		</div>
+ 		<div class="row text-center col-md-12">
+ 			<div id="T1" class="cold-md-12 esconder ">
+			<h3>Digite as Transações:</h3>
+
+			 	<div class="text-justify">
+			 		<h4>Transação 1</h4>
+			 		<div class="row">
+			 			<div class="col-md-1">
+	  						<select id="T1R" class="custom-select ddlRead">
+							  <option selected>READ</option>
+							</select>
+						</div>
+						<div class="col-md-1">
+	  						<select id="T1W" class="custom-select ddlWrite">
+							  <option selected>WRITE</option>
+							</select>
+						</div>
+						<div classs=col-md-1>
+ 							<button id=commitT1 class="btn btn-success">Commit</button>
+ 							<button id=abortT1 class="btn btn-danger">Abort</button>
+						</div>
+						<div class="col-md-9">
+							<h4>T1:<span id=H1></span></h4>
+						</div>
+					</div>
+			 	</div>			
+ 			</div>
+
+ 			<div id="T2" class="cold-md-12 esconder">
+			 	<div class="text-justify">
+			 		<h4>Transação 2</h4>
+			 		<div class="row">
+			 			<div class="col-md-1">
+	  						<select id="T2R" class="custom-select ddlRead">
+							  <option selected>READ</option>
+							</select>
+						</div>
+						<div class="col-md-1">
+	  						<select id="T2W" class="custom-select ddlWrite">
+							  <option selected>WRITE</option>
+							</select>
+						</div>
+						<div classs=col-md-1>
+ 							<button id=commitT2 class="btn btn-success">Commit</button>
+ 							<button id=abortT2 class="btn btn-danger">Abort</button>
+						</div>
+						<div class="col-md-9">
+							<h4>T2:<span id=H2></span></h4>
+						</div>
+					</div>
+			 	</div>			
+ 			</div>
+
+ 			<div id="T3" class="cold-md-3 esconder">
+			 	<div class="text-justify">
+			 		<h4>Transação 3</h4>
+			 		<div class="row">
+			 			<div class="col-md-1">
+	  						<select id="T3R" class="custom-select ddlRead">
+							  <option selected>READ</option>
+							</select>
+						</div>
+						<div class="col-md-1">
+	  						<select id="T3W"class="custom-select ddlWrite">
+							  <option selected>WRITE</option>
+							</select>
+						</div>
+						<div classs=col-md-1>
+ 							<button id=commitT3 class="btn btn-success">Commit</button>
+ 							<button id=abortT3 class="btn btn-danger">Abort</button>
+						</div>
+						<div class="col-md-9">
+							<h4>T3:<span id=H3></span></h4>
+						</div>
+					</div>
+			 	</div>			
+ 			</div>
+
+ 			<div id="T4" class="cold-md-3 esconder">
+			 	<div class="text-justify">
+			 		<h4>Transação 4</h4>
+			 		<div class="row">
+			 			<div class="col-md-1">
+	  						<select id="T4R" class="custom-select ddlRead">
+							  <option selected>READ</option>
+							</select>
+						</div>
+						<div class="col-md-1">
+	  						<select id="T4W" class="custom-select ddlWrite">
+							  <option selected>WRITE</option>
+							</select>
+						</div>
+						<div classs=col-md-1>
+ 							<button id=commitT4 class="btn btn-success">Commit</button>
+ 							<button id=abortT4 class="btn btn-danger">Abort</button>
+						</div>
+						<div class="col-md-9">
+							<h4>T4:<span id=H4></span></h4>
+						</div>
+					</div>
+			 	</div>			
+ 			</div>
+
+
+ 		</div>
+	</div>
+
+	<script src="scripts.js"></script>
+</body>
+</html>
