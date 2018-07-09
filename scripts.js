@@ -1,18 +1,183 @@
 
+
+//Adquirindo bloqueios.
+var deadlock = 0;
+
+function addBlocks(){
+	for(var i = 0; i < historia.HI.length; i++){
+		if(historia.Delay.length!=0)
+			if(verificaTudo(historia.Delay[0],true))
+				historia.Delay.shift();	
+
+		if(verificaTudo(historia.HI[i],false))
+			var deadlock = 0;;
+	}
+	while(historia.Delay.length!=0 && deadlock<10){
+		if(verificaTudo(historia.Delay[0],true))
+				historia.Delay.shift();
+		else
+			deadlock++;
+	}
+	if(deadlock==10)
+	{
+		console.log("DEADLOCK");
+		return;
+	}
+}
+//Métodos
+
+function verificaTudo(operacao,ehDelay){
+
+	if(!verificaSeTransacaoEstaEmDelay(operacao) || ehDelay){
+		var indice = retornaIndice(operacao);
+		var blockExclusivo = estaBloqueadoExclusivo(operacao);
+		var blockCompartilhado = estaBloqueadoCompartilhado(operacao)
+		if(operacao.read){
+			if(blockCompartilhado!=1 && blockCompartilhado!=2 && blockExclusivo == 0)
+			{
+				simulador.dados[indice].blockCompartilhado.push(operacao.nome);
+				historia.HF.push(operacao);
+				return true;
+			}
+			else if(!ehDelay){
+				historia.Delay.push(operacao);			
+				return false;
+			}
+			else if(ehDelay)
+				return false;
+
+		}
+		else if(operacao.write){
+			if(blockExclusivo==0 && blockCompartilhado==0){
+				simulador.dados[indice].blockExclusivo = operacao.nome;
+				historia.HF.push(operacao);
+				return true;
+			}
+			else if(blockExclusivo==0 && blockCompartilhado==1){
+				simulador.dados[indice].blockCompartilhado = [];
+				simulador.dados[indice].blockExclusivo = operacao.nome;
+				historia.HF.push(operacao);
+				return true;
+			}
+			else if(!ehDelay){
+				historia.Delay.push(operacao);
+				return false;
+			}
+		}
+		else if(operacao.commit){
+			for(var i = 0; i < simulador.dados.length; i++){
+				if(simulador.dados[i].blockCompartilhado.length!=0){
+					for(var j = 0;j < simulador.dados[i].blockCompartilhado.length; j++){
+						if(simulador.dados[i].blockCompartilhado[j] == operacao.nome){
+							simulador.dados[i].blockCompartilhado.splice(j,1);
+						}
+					}
+				}
+				if(simulador.dados[i].blockExclusivo!=null && simulador.dados[i].blockExclusivo == operacao.nome)
+					simulador.dados[i].blockExclusivo = null;
+			}
+		}
+		else if(operacao.abort){
+			for(var i = 0; i< historia.HF.length;i++){
+				if(historia.HF[i].nome == operacao.nome){
+					for(var j = 0; j< simulador.dados.length; j++)
+					{
+						if(simulador.dados[j].blockExclusivo == operacao.nome)
+							simulador.dados[j].blockExclusivo = null
+						for(var k = 0; k < simulador.dados[j].blockCompartilhado.length; k++ )
+							if(simulador.dados[j].blockCompartilhado[k] == operacao.nome)
+								simulador.dados[j].blockCompartilhado.splice(k,1);		
+					}
+						historia.Delay.push(historia.HF[i]);
+						historia.HF.splice(i,1);					
+				}
+			}
+		}	 
+	}
+	else if(!ehDelay){
+		historia.Delay.push(operacao);		
+		return true;
+	}
+	else if(ehDelay)
+		return false;
+}
+
+//Métodos auxiliares
+function estaBloqueadoCompartilhado(operação){
+	for(var i=0; i < simulador.dados.length; i++){
+		if(simulador.dados[i].dado == operação.dado){
+			if(simulador.dados[i].blockCompartilhado.length == 0)
+				return 0; // se nao tem nenhum bloqueio compartilhado
+			else if(simulador.dados[i].blockCompartilhado.includes(operação.nome) && simulador.dados[i].blockCompartilhado.length == 1)
+				return 1; // se o único bloqueio compartilhado para esse dado é dessa transacao.
+			else if(simulador.dados[i].blockCompartilhado.includes(operação.nome))
+				return 2;
+			else 
+				return 3; // já tem um bloqueio compartilhado de outra transação pra esse dado
+		}
+	}
+}
+
+function estaBloqueadoExclusivo(operação){
+	for(var i=0; i < simulador.dados.length; i++){
+		if(simulador.dados[i].dado == operação.dado){
+			if(simulador.dados[i].blockExclusivo==null)
+				return 0; // se nao tem block exclusivo
+			else if(simulador.dados[i] != operação.nome)
+				return 1; // se tem block exclusivo mas nao é o mesmo da operacao
+			else if (simulador.dados[i] == operação.nome)
+				return 2; // se tem block exclusivo e é o mesmo da operação
+		}
+	}
+}
+
+//Criando História
+function createHistory(){
+	var finish = 0;
+	var i=0;
+	while(!finish){
+		if(simulador.t1[i]== undefined && simulador.t2[i]== undefined && simulador.t3[i]== undefined && simulador.t4[i]== undefined){
+			finish = 1;
+		}
+		else
+		{
+			if(simulador.t1[i]!= undefined)
+				historia.HI.push(simulador.t1[i])
+			if(simulador.t2[i]!= undefined)
+				historia.HI.push(simulador.t2[i])
+			if(simulador.t3[i]!= undefined)
+				historia.HI.push(simulador.t3[i])
+			if(simulador.t4[i]!= undefined)
+				historia.HI.push(simulador.t4[i])
+			i++;
+		}
+	}
+
+}
+
+function retornaIndice(operacao){
+	for(var i = 0; i< simulador.dados.length;i++)
+		if(simulador.dados[i].dado == operacao.dado)
+			return i;
+}
+
+function verificaSeTransacaoEstaEmDelay(operacao){
+	for(var i = 0; i < historia.Delay.length; i++)
+		if(historia.Delay[i].nome == operacao.nome)
+			return true;
+
+	return false;
+}
+
 function addDDLREAD(){
 	for(var i=0; i<simulador.dados.length;i++)
-		$('.ddlRead').html($('.ddlRead').html() + '<option value="' + simulador.dados[i] + '">' + simulador.dados[i] + '</option>' );
+		$('.ddlRead').html($('.ddlRead').html() + '<option value="' + simulador.dados[i].dado + '">' + simulador.dados[i].dado + '</option>' );
 }
 
 function addDDLWRITE(){
 	for(var i=0; i<simulador.dados.length;i++)
-		$('.ddlWrite').html($('.ddlWrite').html() + '<option value="' + simulador.dados[i] + '">' + simulador.dados[i] + '</option>' );
+		$('.ddlWrite').html($('.ddlWrite').html() + '<option value="' + simulador.dados[i].dado + '">' + simulador.dados[i].dado + '</option>' );
 }
-
-
-
-
-
 
 //Constructor
 	function Simulador(){
@@ -23,7 +188,14 @@ function addDDLWRITE(){
 		this.t4 =[];
 	}
 
+	function Dado(){
+		this.dado = null;
+		this.blockCompartilhado = [];
+		this.blockExclusivo = null;
+	}
+
 	function Transacao(){
+		this.nome = null;
 		this.dado = null;
 		this.read = false;
 		this.write = false;
@@ -31,9 +203,22 @@ function addDDLWRITE(){
 		this.abort = false;
 	}
 
+	function Historia(){
+		this.HI = [];
+		this.HF = [];
+		this.Delay =[];
+	}
+
+	var Transacao1 = "T1",
+		Transacao2 = "T2",
+		Transacao3 = "T3",
+		Transacao4 = "T4",
+		ls = 0,
+		lx = 1;
+
 //Instance
 	var simulador = new Simulador();
-
+	var historia = new Historia();
 //Events
 
 	//textbox enter event
@@ -43,7 +228,9 @@ function addDDLWRITE(){
 	  	if (event.keyCode === 13) {
 	    // Trigger the button element with a click
 	    	$('#idDadosCadastrados').html($('#idDadosCadastrados').html() + " " + $('#IdDados').val());
-	    	simulador.dados.push($('#IdDados').val());
+	    	var d = new Dado();
+	    	d.dado = $('#IdDados').val();
+	    	simulador.dados.push(d);
 	    	$('#IdDados').val('');
 	  }
 	});
@@ -55,11 +242,14 @@ function addDDLWRITE(){
 		readEvent();
 		writeEvent();
 		showDivs();
+		btnIniciar();
 	})
 
 	$('#commitT1').on('click',function(){
 		var t = new Transacao();
 		t.commit = true;
+		t.nome = Transacao1;
+		simulador.t1.push(t);
 		commitAbortEventT1();
 		$('#H1').html($('#H1').html() + " -> " + "commit");
 	});
@@ -67,6 +257,8 @@ function addDDLWRITE(){
 	$('#commitT2').on('click',function(){
 		var t = new Transacao();
 		t.commit = true;
+		t.nome = Transacao2;
+		simulador.t2.push(t);
 		commitAbortEventT2();
 		$('#H2').html($('#H2').html() + " -> " + "commit");
 	});
@@ -74,6 +266,8 @@ function addDDLWRITE(){
 	$('#commitT3').on('click',function(){
 		var t = new Transacao();
 		t.commit = true;
+		t.nome = Transacao3;
+		simulador.t3.push(t);
 		commitAbortEventT3();
 		$('#H3').html($('#H3').html() + " -> " + "commit");
 	});
@@ -81,6 +275,9 @@ function addDDLWRITE(){
 	$('#commitT4').on('click',function(){
 		var t = new Transacao();
 		t.commit = true;
+		t.nome = Transacao4;
+
+		simulador.t4.push(t);
 		commitAbortEventT4();
 		$('#H4').html($('#H4').html() + " -> " + "commit");
 	});
@@ -88,6 +285,8 @@ function addDDLWRITE(){
 	$('#abortT1').on('click',function(){
 		var t = new Transacao();
 		t.abort = true;
+		t.nome = Transacao1;
+		simulador.t1.push(t);
 		commitAbortEventT1();
 		$('#H1').html($('#H1').html() + " -> " + "abort");
 	});
@@ -95,6 +294,8 @@ function addDDLWRITE(){
 	$('#abortT2').on('click',function(){
 		var t = new Transacao();
 		t.abort = true;
+		t.nome = Transacao2;
+		simulador.t2.push(t);
 		commitAbortEventT2();
 		$('#H2').html($('#H2').html() + " -> " + "abort");
 	});
@@ -102,6 +303,8 @@ function addDDLWRITE(){
 	$('#abortT3').on('click',function(){
 		var t = new Transacao();
 		t.abort = true;
+		t.nome = Transacao3;		
+		simulador.t3.push(t);
 		commitAbortEventT3();
 		$('#H3').html($('#H3').html() + " -> " + "abort");
 	});
@@ -109,16 +312,115 @@ function addDDLWRITE(){
 	$('#abortT4').on('click',function(){
 		var t = new Transacao();
 		t.abort = true;
+		t.nome = Transacao4;
+		simulador.t4.push(t);
 		commitAbortEventT4();
 		$('#H4').html($('#H4').html() + " -> " + "abort");
 	});
 
+	$('#historia1').on('click',function(){
+		var tr = new Transacao();
+		tr.read = true;
+		tr.nome = Transacao1;
+		tr.dado = "a"
+		simulador.t1.push(tr)
+
+		var tw = new Transacao();
+		tw.write = true;
+		tw.nome = Transacao1;
+		tw.dado = "a";
+		simulador.t1.push(tw);
+
+		var tr2 = new Transacao();
+		tr2.read = true;
+		tr2.nome = Transacao2;
+		tr2.dado = "b"
+		simulador.t2.push(tr2)
+
+		var tw2 = new Transacao();
+		tw2.write = true;
+		tw2.nome = Transacao2;
+		tw2.dado = "b";
+		simulador.t2.push(tw2);
+
+		var tc = new Transacao();
+		tc.abort = true;
+		tc.nome = Transacao1;
+		simulador.t1.push(tc)
+
+		var tc2 = new Transacao();
+		tc2.commit = true;
+		tc2.nome = Transacao2;
+		simulador.t2.push(tc2)
+
+		simulador.dados = [];
+		var d = new Dado();
+	    	d.dado = "a"
+	    	simulador.dados.push(d);
+
+	    var d2 = new Dado();
+	    	d2.dado = "b"
+	    	simulador.dados.push(d2);
+	})
+
+	$('#historia2').on('click',function(){
+		var tr = new Transacao();
+		tr.read = true;
+		tr.nome = Transacao1;
+		tr.dado = "a"
+		simulador.t1.push(tr)
+
+		var tw = new Transacao();
+		tw.write = true;
+		tw.nome = Transacao1;
+		tw.dado = "b";
+		simulador.t1.push(tw);
+
+		var tw2 = new Transacao();
+		tw2.write = true;
+		tw2.nome = Transacao2;
+		tw2.dado = "a";
+		simulador.t2.push(tw2);
+
+		var tr2 = new Transacao();
+		tr2.read = true;
+		tr2.nome = Transacao2;
+		tr2.dado = "b"
+		simulador.t2.push(tr2)
+
+		var tc = new Transacao();
+		tc.commit = true;
+		tc.nome = Transacao1;
+		simulador.t1.push(tc)
+
+		var tc2 = new Transacao();
+		tc2.commit = true;
+		tc2.nome = Transacao1;
+		simulador.t2.push(tc2)
+		
+		simulador.dados = [];
+		var d = new Dado();
+	    	d.dado = "a"
+	    	simulador.dados.push(d);
+
+	    var d2 = new Dado();
+	    	d2.dado = "b"
+	    	simulador.dados.push(d2);
+	})
+
+	var btnIniciar = function(){ $('#btnIniciar').on('click',function(){
+		createHistory();
+		addBlocks();
+		mostraHI();
+	})};
 
 
 	var readEventT1 = function(){ $("#T1R").on('change',function(){
 		var t1 = new Transacao();
 		t1.dado = $("#T1R").val();
 		t1.read = true;
+		t1.nome = Transacao1;
+
 		simulador.t1.push(t1);
 
 		if($('#H1').html() == "")
@@ -130,6 +432,8 @@ function addDDLWRITE(){
 		var t1 = new Transacao();
 		t1.dado = $("#T1W").val();
 		t1.write = true;
+		t1.nome = Transacao1;
+
 		simulador.t1.push(t1);
 
 		if($('#H1').html() == "")
@@ -142,6 +446,8 @@ function addDDLWRITE(){
 		var t2 = new Transacao();
 		t2.dado = $("#T2R").val();
 		t2.read = true;
+		t2.nome = Transacao2;
+
 		simulador.t2.push(t2);
 
 		if($('#H2').html() == "")
@@ -153,6 +459,8 @@ function addDDLWRITE(){
 		var t2 = new Transacao();
 		t2.dado = $("#T2W").val();
 		t2.write = true;
+		t2.nome = Transacao2;
+
 		simulador.t2.push(t2);
 
 		if($('#H2').html() == "")
@@ -165,6 +473,8 @@ function addDDLWRITE(){
 		var t3 = new Transacao();
 		t3.dado = $("#T3R").val();
 		t3.read = true;
+		t3.nome = Transacao3;
+
 		simulador.t3.push(t3);
 
 		if($('#H3').html() == "")
@@ -176,6 +486,8 @@ function addDDLWRITE(){
 		var t3 = new Transacao();
 		t3.dado = $("#T3W").val();
 		t3.write = true;
+		t3.nome = Transacao3;
+
 		simulador.t3.push(t3);
 
 		if($('#H3').html() == "")
@@ -188,6 +500,8 @@ function addDDLWRITE(){
 		var t4 = new Transacao();
 		t4.dado = $("#T4R").val();
 		t4.read = true;
+		t4.nome = Transacao4;
+
 		simulador.t4.push(t4);
 
 		if($('#H4').html() == "")
@@ -199,6 +513,8 @@ function addDDLWRITE(){
 		var t4 = new Transacao();
 		t4.dado = $("#T4W").val();
 		t4.read = true;
+		t4.nome = Transacao4;
+
 		simulador.t4.push(t4);
 
 		if($('#H4').html() == "")
@@ -252,18 +568,76 @@ function addDDLWRITE(){
 		if($('#rdb1').is(':checked')){
 			$( "#T1" ).removeClass( "esconder" );
 			$( "#T2" ).removeClass( "esconder" )	
+			$( "#titulo" ).removeClass( "esconder" )	
+			$( "#tPadrao" ).removeClass( "esconder" )	
+			$( "#hfDiv" ).removeClass( "esconder" )	
 		}
 		else if($('#rdb2').is(':checked')){
 			$( "#T1" ).removeClass( "esconder" );
 			$( "#T2" ).removeClass( "esconder" )
 			$( "#T3" ).removeClass( "esconder" )
+			$( "#titulo" ).removeClass( "esconder" )	
+			$( "#tPadrao" ).removeClass( "esconder" )	
+			$( "#hfDiv" ).removeClass( "esconder" )	
+
 		}
 		else if($('#rdb3').is(':checked')){
 			$( "#T1" ).removeClass( "esconder" );
 			$( "#T2" ).removeClass( "esconder" )
 			$( "#T3" ).removeClass( "esconder" )
 			$( "#T4" ).removeClass( "esconder" )
-
+			$( "#titulo" ).removeClass( "esconder" )	
+			$( "#tPadrao" ).removeClass( "esconder" )	
+			$( "#hfDiv" ).removeClass( "esconder" )	
 		}
+	}
+
+	function mostraHI(){
+		var div = "";
+		for(var i = 0; i < historia.HI.length; i++)
+		{
+			if(historia.HI[i].nome == "T1" && historia.HI[i].read)
+				div+= "r1(" + historia.HI[i].dado + ") - ";
+			else if(historia.HI[i].nome == "T1" && historia.HI[i].write)
+				div+= "w1(" + historia.HI[i].dado + ") - ";
+			else if(historia.HI[i].nome == "T1" && historia.HI[i].commit)
+				div+= "c1 - ";
+			else if(historia.HI[i].nome == "T1" && historia.HI[i].abort)
+				div+= "a1 - ";
+
+			else if(historia.HI[i].nome == "T2" && historia.HI[i].read)
+				div+= "r2(" + historia.HI[i].dado + ") - ";
+			else if(historia.HI[i].nome == "T2" && historia.HI[i].write)
+				div+= "w2(" + historia.HI[i].dado + ") - ";
+			else if(historia.HI[i].nome == "T2" && historia.HI[i].commit)
+				div+= "c2 - ";
+			else if(historia.HI[i].nome == "T2" && historia.HI[i].abort)
+				div+= "a2 - ";
+
+			else if(historia.HI[i].nome == "T3" && historia.HI[i].read)
+				div+= "r3(" + historia.HI[i].dado + ") - ";
+			else if(historia.HI[i].nome == "T3" && historia.HI[i].write)
+				div+= "w3(" + historia.HI[i].dado + ") - ";
+			else if(historia.HI[i].nome == "T3" && historia.HI[i].commit)
+				div+= "c3 - ";
+			else if(historia.HI[i].nome == "T3" && historia.HI[i].abort)
+				div+= "a3 - ";
+
+			else if(historia.HI[i].nome == "T4" && historia.HI[i].read)
+				div+= "r4(" + historia.HI[i].dado + ") - ";
+			else if(historia.HI[i].nome == "T4" && historia.HI[i].write)
+				div+= "w4(" + historia.HI[i].dado + ") - ";
+			else if(historia.HI[i].nome == "T4" && historia.HI[i].commit)
+				div+= "c4 - ";
+			else if(historia.HI[i].nome == "T4" && historia.HI[i].abort)
+				div+= "a4 - ";
+		}
+
+		$('#hi').html(div);
+
+	}
+
+	function mostraHF(){
+		
 	}
 	

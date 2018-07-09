@@ -43,28 +43,30 @@
  				<button id=addTransacao class="btn btn-primary">Adicionar Transação</button>
  			</div>
  		</div>
- 		<div class="row text-center col-md-12">
+ 		<div id="titulo" class="text-center esconder">
+			<h3>Digite as Transações ou escolha um conjunto padrão</h3>
+		</div>
+ 		<div class="row col-md-6">
  			<div id="T1" class="cold-md-12 esconder ">
-			<h3>Digite as Transações:</h3>
 
 			 	<div class="text-justify">
 			 		<h4>Transação 1</h4>
 			 		<div class="row">
-			 			<div class="col-md-1">
+			 			<div class="col-md-2">
 	  						<select id="T1R" class="custom-select ddlRead">
 							  <option selected>READ</option>
 							</select>
 						</div>
-						<div class="col-md-1">
+						<div class="col-md-2">
 	  						<select id="T1W" class="custom-select ddlWrite">
 							  <option selected>WRITE</option>
 							</select>
 						</div>
-						<div classs=col-md-1>
+						<div classs=col-md-3>
  							<button id=commitT1 class="btn btn-success">Commit</button>
  							<button id=abortT1 class="btn btn-danger">Abort</button>
 						</div>
-						<div class="col-md-9">
+						<div class="col-md-5">
 							<h4>T1:<span id=H1></span></h4>
 						</div>
 					</div>
@@ -75,21 +77,21 @@
 			 	<div class="text-justify">
 			 		<h4>Transação 2</h4>
 			 		<div class="row">
-			 			<div class="col-md-1">
+			 			<div class="col-md-2">
 	  						<select id="T2R" class="custom-select ddlRead">
 							  <option selected>READ</option>
 							</select>
 						</div>
-						<div class="col-md-1">
+						<div class="col-md-2">
 	  						<select id="T2W" class="custom-select ddlWrite">
 							  <option selected>WRITE</option>
 							</select>
 						</div>
-						<div classs=col-md-1>
+						<div classs=col-md-3>
  							<button id=commitT2 class="btn btn-success">Commit</button>
  							<button id=abortT2 class="btn btn-danger">Abort</button>
 						</div>
-						<div class="col-md-9">
+						<div class="col-md-5">
 							<h4>T2:<span id=H2></span></h4>
 						</div>
 					</div>
@@ -100,21 +102,21 @@
 			 	<div class="text-justify">
 			 		<h4>Transação 3</h4>
 			 		<div class="row">
-			 			<div class="col-md-1">
+			 			<div class="col-md-2">
 	  						<select id="T3R" class="custom-select ddlRead">
 							  <option selected>READ</option>
 							</select>
 						</div>
-						<div class="col-md-1">
+						<div class="col-md-2">
 	  						<select id="T3W"class="custom-select ddlWrite">
 							  <option selected>WRITE</option>
 							</select>
 						</div>
-						<div classs=col-md-1>
+						<div classs=col-md-3>
  							<button id=commitT3 class="btn btn-success">Commit</button>
  							<button id=abortT3 class="btn btn-danger">Abort</button>
 						</div>
-						<div class="col-md-9">
+						<div class="col-md-5">
 							<h4>T3:<span id=H3></span></h4>
 						</div>
 					</div>
@@ -125,27 +127,41 @@
 			 	<div class="text-justify">
 			 		<h4>Transação 4</h4>
 			 		<div class="row">
-			 			<div class="col-md-1">
+			 			<div class="col-md-2">
 	  						<select id="T4R" class="custom-select ddlRead">
 							  <option selected>READ</option>
 							</select>
 						</div>
-						<div class="col-md-1">
+						<div class="col-md-2">
 	  						<select id="T4W" class="custom-select ddlWrite">
 							  <option selected>WRITE</option>
 							</select>
 						</div>
-						<div classs=col-md-1>
+						<div classs=col-md-3>
  							<button id=commitT4 class="btn btn-success">Commit</button>
  							<button id=abortT4 class="btn btn-danger">Abort</button>
 						</div>
-						<div class="col-md-9">
+						<div class="col-md-5">
 							<h4>T4:<span id=H4></span></h4>
 						</div>
 					</div>
 			 	</div>			
  			</div>
-
+ 		</div>
+ 		<div class="col-md-4">
+ 			<div id="tPadrao" class="row esconder">
+ 				<h4>História 1</h4>
+ 				<button id=historia1 class="btn btn-default">r1(A)-w1(A)-r2(B)-w2(B)-A1-C2</button>
+ 				<h4>História 2</h4>
+ 				<button id=historia2 class="btn btn-default">r1(A)-w2(A)-r2(B)-w1(B)-C1-C2</button>
+ 			</div>
+ 		</div>
+ 		<div class="col-md-2">
+ 			<div id="hfDiv" class="row esconder">
+ 				<button id="btnIniciar" class="btn btn-success">Iniciar</button>
+ 				<h4>HI:<span id="hi"></span></h4>
+ 				<h4>HF:<span id="hf"></span></h4>
+ 			</div>
 
  		</div>
 	</div>
